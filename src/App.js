@@ -2,14 +2,16 @@ import React, { Component } from 'react';
 
 import Board from './components/Board';
 
+import { getBoard, checkRows, checkColumns, checkDiagonal, checkAntiDiagonal } from './utils';
+
 import './App.css';
 
 class App extends Component {
   state = {
     curGameState: [
-      [0,0,0],
-      [0,0,0],
-      [0,0,0], 
+      [0, 0, 0],
+      [0, 0, 0],
+      [0, 0, 0],
     ],
     curPlayer: 0,
     winner: '',
@@ -18,123 +20,52 @@ class App extends Component {
     err: ''
   };
 
-  checkRows = () => {
-    const curGameState = this.state.curGameState;
-    const curPlayer = this.state.curPlayer;
-    const comparedValue = curPlayer === 0 ? 1 : 2;
-
-    for(let i =0; i<3; i++) {
-      let rowComplete = false;
-      rowComplete = curGameState[i].every(item => {
-        return item === comparedValue
-      });
-      if(rowComplete) {
-        return [true,i];
-      }
-    }
-    return [false,-1];
-  }
-
-  checkColumns = () => {
-    const curGameState = this.state.curGameState;
-    const curPlayer = this.state.curPlayer;
-    const comparedValue = curPlayer === 0 ? 1 : 2;
-
-    for(let j=0;j<3;j++) {
-      let columnComplete = true;
-      for(let i = 0; i<3; i++) {
-        if(curGameState[i][j] !== comparedValue) {
-          columnComplete = false;
-          break;
-        }
-      }
-      if(columnComplete) {
-        return [true,j];  
-      } 
-    }
-    return [false,-1];
-  }
-
-  checkDiagonal = () => {
-    const curGameState = this.state.curGameState;
-    const curPlayer = this.state.curPlayer;
-    const comparedValue = curPlayer === 0 ? 1 : 2;
-
-    let diagonal = true;
-    
-    for(let i = 0, j=0; i < 3 && j<3; i++,j++) {
-      if(curGameState[i][j] !== comparedValue) {
-        diagonal = false;
-        break;
-      }
-    }
-
-    return diagonal;
-  }
-
-  checkAntiDiagonal = () => {
-    const curGameState = this.state.curGameState;
-    const curPlayer = this.state.curPlayer;
-    const comparedValue = curPlayer === 0 ? 1 : 2;
-
-    let antiDiagonal = true;
-
-    for(let i = 0, j = 3 - 1; i < 3 && j >= 0; i++, j--) {
-      if(curGameState[i][j] !== comparedValue) {
-        antiDiagonal = false;
-        break;
-      }
-    }
-
-    return antiDiagonal;
-  }
-
   computeWinner = () => {
-    const curPlayer = this.state.curPlayer;
+    const { curPlayer, curGameState, boardSize } = this.state;
     let gameFinised = false;
 
-    const [rowComplete,row] = this.checkRows();
-    if(rowComplete) {
+    const [rowComplete, row] = checkRows({ curGameState, curPlayer, boardSize });
+    if (rowComplete) {
       gameFinised = true;
     }
 
-    const [columnComplete,column] = this.checkColumns();
-    if(columnComplete) {
+    const [columnComplete, column] = checkColumns({ curGameState, curPlayer, boardSize });
+    if (columnComplete) {
       gameFinised = true;
     }
 
-    const diagonalWise = this.checkDiagonal();
-    if(diagonalWise) {
+    const diagonalWise = checkDiagonal({ curGameState, curPlayer, boardSize });
+    if (diagonalWise) {
       gameFinised = true;
     }
 
-    const antiDiagonal = this.checkAntiDiagonal();
-    if(antiDiagonal) {
+    const antiDiagonal = checkAntiDiagonal({ curGameState, curPlayer, boardSize });
+    if (antiDiagonal) {
       gameFinised = true;
     }
 
-    if(gameFinised) {
+    if (gameFinised) {
       const winner = curPlayer === 0 ? 'player 1' : 'player 2';
       this.setState({
         winner
       })
     }
     else {
-    this.setState((prevState) => ({
-      curPlayer: prevState.curPlayer === 0 ? 1 : 0
-    }));
+      this.setState((prevState) => ({
+        curPlayer: prevState.curPlayer === 0 ? 1 : 0
+      }));
     }
   }
 
-  handleBoxClick = (selectedRowIndex,selectedItemIndex) => {
+  handleBoxClick = (selectedRowIndex, selectedItemIndex) => {
     const curPlayer = this.state.curPlayer;
-    const changedGameState = this.state.curGameState.map((row,rowIndex) => {
-      if(rowIndex !== selectedRowIndex) {
+    const changedGameState = this.state.curGameState.map((row, rowIndex) => {
+      if (rowIndex !== selectedRowIndex) {
         return row;
       }
       else {
-        return row.map((item,itemIndex) => {
-          if(itemIndex !== selectedItemIndex) {
+        return row.map((item, itemIndex) => {
+          if (itemIndex !== selectedItemIndex) {
             return item;
           }
           else {
@@ -155,7 +86,7 @@ class App extends Component {
     const value = e.target.value;
     let err = '';
 
-    if(value < 3 || value%2 === 0) {
+    if (value < 3 || value % 2 === 0) {
       err = value < 3 ? 'Board size must be greater than 3!' : 'Board size must be odd';
     }
 
@@ -168,15 +99,17 @@ class App extends Component {
   handleGameStart = (e) => {
     e.preventDefault();
     const boardSize = this.state.boardSize;
+    const initialGameState = getBoard(boardSize);
     this.setState({
-      startGame: true
+      startGame: true,
+      curGameState: initialGameState
     })
   }
 
   isGameStartAllowed = () => {
     const boardSize = this.state.boardSize;
 
-    if(boardSize >=3 && (boardSize%2)!== 0)
+    if (boardSize >= 3 && (boardSize % 2) !== 0)
       return false;
     return true;
   }
@@ -184,7 +117,7 @@ class App extends Component {
   render() {
     const winner = this.state.winner;
 
-    if(winner) {
+    if (winner) {
       return (
         <div>Game was won by: {winner}</div>
       )
@@ -200,7 +133,7 @@ class App extends Component {
           </div>
           <button type="submit" disabled={this.isGameStartAllowed()}>Submit</button>
         </form>
-        {this.state.startGame && <Board curGameState={this.state.curGameState} handleBoxClick={(selectedRowIndex,selectedItemIndex) => this.handleBoxClick(selectedRowIndex,selectedItemIndex)} />}
+        {this.state.startGame && <Board curGameState={this.state.curGameState} handleBoxClick={(selectedRowIndex, selectedItemIndex) => this.handleBoxClick(selectedRowIndex, selectedItemIndex)} />}
       </div>
     );
   }
