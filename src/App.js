@@ -37,20 +37,31 @@ class App extends Component {
     return diagonal;
   }
 
-  // checkAntiDiagonal = () => {
-
-  // }
+  checkAntiDiagonal = () => {
+    const curGameState = this.state.curGameState;
+    let antiDiagonal = true;
+    for(let i = 0, j = 3 - 1; i < 3 && j >= 0; i++, j--) {
+      if(curGameState[i][j] !== 1) {
+        antiDiagonal = false;
+        break;
+      }
+    }
+    return antiDiagonal;
+  }
 
   computeWinner = () => {
     const curGameState = this.state.curGameState;
-    // const [rowComplete,row] = this.checkRows();
-    // console.log('checkRows',rowComplete,row);
-    // if(rowComplete) {
-    //   console.log('won by rowise',row);
-    // }
+    const [rowComplete,row] = this.checkRows();
+    if(rowComplete) {
+      console.log('won by rowise',row);
+    }
     const diagonalWise = this.checkDiagonal();
     if(diagonalWise) {
       console.log('win by diagonal');
+    }
+    const antiDiagonal = this.checkAntiDiagonal();
+    if(antiDiagonal) {
+      console.log('won by antiDiagonal');
     }
   }
 
@@ -79,7 +90,7 @@ class App extends Component {
 
   renderCurGameState = () => {
     const curGameState = this.state.curGameState;
-    console.log(curGameState);
+    // console.log(curGameState);
     return (
       <div class="board">
         {this.state.curGameState.map((row,rowIndex) =>
