@@ -23,6 +23,23 @@ class App extends Component {
     return [false,-1];
   }
 
+  checkColumns = () => {
+    const curGameState = this.state.curGameState;
+    for(let j=0;j<3;j++) {
+      let columnComplete = true;
+      for(let i = 0; i<3; i++) {
+        if(curGameState[i][j] !== 1) {
+          columnComplete = false;
+          break;
+        }
+      }
+      if(columnComplete) {
+        return [true,j];  
+      } 
+    }
+    return [false,-1];
+  }
+
   checkDiagonal = () => {
     const curGameState = this.state.curGameState;
     let diagonal = true;
@@ -54,6 +71,10 @@ class App extends Component {
     const [rowComplete,row] = this.checkRows();
     if(rowComplete) {
       console.log('won by rowise',row);
+    }
+    const [columnComplete,column] = this.checkColumns();
+    if(columnComplete) {
+      console.log('won by column',column);
     }
     const diagonalWise = this.checkDiagonal();
     if(diagonalWise) {
