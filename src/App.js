@@ -16,8 +16,9 @@ class App extends Component {
     curPlayer: 0,
     winner: '',
     boardSize: 0,
-    startGame: false,
-    err: ''
+    isGameStarted: false,
+    err: '',
+    curMoves: 0
   };
 
   computeWinner = () => {
@@ -52,34 +53,26 @@ class App extends Component {
     }
     else {
       this.setState((prevState) => ({
-        curPlayer: prevState.curPlayer === 0 ? 1 : 0
+        curPlayer: prevState.curPlayer === 0 ? 1 : 0,
+        curMoves: prevState.curMoves++
       }));
     }
   }
 
   handleBoxClick = (selectedRowIndex, selectedItemIndex) => {
     const curPlayer = this.state.curPlayer;
-    const changedGameState = this.state.curGameState.map((row, rowIndex) => {
-      if (rowIndex !== selectedRowIndex) {
-        return row;
-      }
-      else {
-        return row.map((item, itemIndex) => {
-          if (itemIndex !== selectedItemIndex) {
-            return item;
-          }
-          else {
-            const value = curPlayer === 0 ? 1 : 2;
-            return value;
-          }
-        });
-      }
-    });
-    this.setState({
-      curGameState: changedGameState,
-    }, () => {
-      this.computeWinner();
-    });
+    const curGameState = this.state.curGameState;
+
+    const value = curPlayer === 0 ? 1 : 2;
+    
+    if(curGameState[selectedRowIndex][selectedItemIndex] === 0) {
+      curGameState[selectedRowIndex][selectedItemIndex] = value;
+      this.setState({
+        curGameState,
+      }, () => {
+        this.computeWinner();
+      });
+    }
   }
 
   handleBoardSizeChange = (e) => {
@@ -101,8 +94,8 @@ class App extends Component {
     const boardSize = this.state.boardSize;
     const initialGameState = getBoard(boardSize);
     this.setState({
-      startGame: true,
-      curGameState: initialGameState
+      isGameStarted: true,
+      curGameState: initialGameState,
     })
   }
 
@@ -114,18 +107,25 @@ class App extends Component {
     return true;
   }
 
-  render() {
-    const winner = this.state.winner;
+  handlePlayAgain = () => {
+    window.location.reload();
+  }
 
-    if (winner) {
+  render() {
+    const { isGameStarted, winner, boardSize, curMoves } = this.state;
+
+    if (isGameStarted && curMoves >= boardSize * boardSize) {
       return (
-        <div>Game was won by: {winner}</div>
+        <div>
+          Game Over
+          <button onClick={this.handlePlayAgain}> Play again </button>
+        </div>
       )
     }
 
     return (
       <div className="App">
-        <form onChange={this.handleBoardSizeChange} onSubmit={this.handleGameStart}>
+        {!isGameStarted && <form onChange={this.handleBoardSizeChange} onSubmit={this.handleGameStart}>
           <div>
             <label>Enter Board Size: </label>
             <input placeholder="Enter the board size (should be greater than 3 and odd)" type="number" />
@@ -133,7 +133,12 @@ class App extends Component {
           </div>
           <button type="submit" disabled={this.isGameStartAllowed()}>Submit</button>
         </form>
-        {this.state.startGame && <Board curGameState={this.state.curGameState} handleBoxClick={(selectedRowIndex, selectedItemIndex) => this.handleBoxClick(selectedRowIndex, selectedItemIndex)} />}
+        }
+        {winner && <div>
+          <div>Game was won by: {winner}</div>
+          <button onClick={this.handlePlayAgain}> Play again </button>
+        </div>}
+        {isGameStarted && <Board curGameState={this.state.curGameState} handleBoxClick={(selectedRowIndex, selectedItemIndex) => this.handleBoxClick(selectedRowIndex, selectedItemIndex)} />}
       </div>
     );
   }
