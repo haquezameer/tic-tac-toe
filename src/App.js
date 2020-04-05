@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 
+import Board from './components/Board';
+
 import './App.css';
 
 class App extends Component {
@@ -146,18 +148,6 @@ class App extends Component {
     });
   }
 
-  renderCurGameState = () => {
-    return (
-      <div class="board">
-        {this.state.curGameState.map((row,rowIndex) =>
-          <div class="row"> 
-            {row.map((item,itemIndex) => <div class="row__Item" onClick={() => this.handleBoxClick(rowIndex,itemIndex)}>{item}</div>)} 
-          </div>
-        )}
-      </div>
-    )
-  }
-
   render() {
     const winner = this.state.winner;
     
@@ -169,7 +159,7 @@ class App extends Component {
 
     return (
       <div className="App">
-        {this.renderCurGameState()}
+        <Board curGameState={this.state.curGameState} handleBoxClick={(selectedRowIndex,selectedItemIndex) => this.handleBoxClick(selectedRowIndex,selectedItemIndex)} />
       </div>
     );
   }
