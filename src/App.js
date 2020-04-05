@@ -12,7 +12,10 @@ class App extends Component {
       [0,0,0], 
     ],
     curPlayer: 0,
-    winner: ''
+    winner: '',
+    boardSize: 0,
+    startGame: false,
+    err: ''
   };
 
   checkRows = () => {
@@ -148,9 +151,39 @@ class App extends Component {
     });
   }
 
+  handleBoardSizeChange = (e) => {
+    const value = e.target.value;
+    let err = '';
+
+    if(value < 3 || value%2 === 0) {
+      err = value < 3 ? 'Board size must be greater than 3!' : 'Board size must be odd';
+    }
+
+    this.setState({
+      boardSize: value,
+      err
+    })
+  }
+
+  handleGameStart = (e) => {
+    e.preventDefault();
+    const boardSize = this.state.boardSize;
+    this.setState({
+      startGame: true
+    })
+  }
+
+  isGameStartAllowed = () => {
+    const boardSize = this.state.boardSize;
+
+    if(boardSize >=3 && (boardSize%2)!== 0)
+      return false;
+    return true;
+  }
+
   render() {
     const winner = this.state.winner;
-    
+
     if(winner) {
       return (
         <div>Game was won by: {winner}</div>
@@ -159,7 +192,15 @@ class App extends Component {
 
     return (
       <div className="App">
-        <Board curGameState={this.state.curGameState} handleBoxClick={(selectedRowIndex,selectedItemIndex) => this.handleBoxClick(selectedRowIndex,selectedItemIndex)} />
+        <form onChange={this.handleBoardSizeChange} onSubmit={this.handleGameStart}>
+          <div>
+            <label>Enter Board Size: </label>
+            <input placeholder="Enter the board size (should be greater than 3 and odd)" type="number" />
+            {this.state.err && <div>{this.state.err}</div>}
+          </div>
+          <button type="submit" disabled={this.isGameStartAllowed()}>Submit</button>
+        </form>
+        {this.state.startGame && <Board curGameState={this.state.curGameState} handleBoxClick={(selectedRowIndex,selectedItemIndex) => this.handleBoxClick(selectedRowIndex,selectedItemIndex)} />}
       </div>
     );
   }
