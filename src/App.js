@@ -1,21 +1,28 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
+
 import './App.css';
 
 class App extends Component {
   state = {
     curGameState: [
-      [0, 0, 0],
-      [0, 0, 0],
-      [0, 0, 0]
-    ]
+      [0,0,0],
+      [0,0,0],
+      [0,0,0], 
+    ],
+    curPlayer: 0,
+    winner: ''
   };
 
   checkRows = () => {
     const curGameState = this.state.curGameState;
+    const curPlayer = this.state.curPlayer;
+    const comparedValue = curPlayer === 0 ? 1 : 2;
+
     for(let i =0; i<3; i++) {
       let rowComplete = false;
-      rowComplete = curGameState[i].every(item => item === 1);
+      rowComplete = curGameState[i].every(item => {
+        return item === comparedValue
+      });
       if(rowComplete) {
         return [true,i];
       }
@@ -25,10 +32,13 @@ class App extends Component {
 
   checkColumns = () => {
     const curGameState = this.state.curGameState;
+    const curPlayer = this.state.curPlayer;
+    const comparedValue = curPlayer === 0 ? 1 : 2;
+
     for(let j=0;j<3;j++) {
       let columnComplete = true;
       for(let i = 0; i<3; i++) {
-        if(curGameState[i][j] !== 1) {
+        if(curGameState[i][j] !== comparedValue) {
           columnComplete = false;
           break;
         }
@@ -42,10 +52,13 @@ class App extends Component {
 
   checkDiagonal = () => {
     const curGameState = this.state.curGameState;
+    const curPlayer = this.state.curPlayer;
+    const comparedValue = curPlayer === 0 ? 1 : 2;
+
     let diagonal = true;
     
     for(let i = 0, j=0; i < 3 && j<3; i++,j++) {
-      if(curGameState[i][j] !== 1) {
+      if(curGameState[i][j] !== comparedValue) {
         diagonal = false;
         break;
       }
@@ -56,37 +69,60 @@ class App extends Component {
 
   checkAntiDiagonal = () => {
     const curGameState = this.state.curGameState;
+    const curPlayer = this.state.curPlayer;
+    const comparedValue = curPlayer === 0 ? 1 : 2;
+
     let antiDiagonal = true;
+
     for(let i = 0, j = 3 - 1; i < 3 && j >= 0; i++, j--) {
-      if(curGameState[i][j] !== 1) {
+      if(curGameState[i][j] !== comparedValue) {
         antiDiagonal = false;
         break;
       }
     }
+
     return antiDiagonal;
   }
 
   computeWinner = () => {
-    const curGameState = this.state.curGameState;
+    const curPlayer = this.state.curPlayer;
+    let gameFinised = false;
+
     const [rowComplete,row] = this.checkRows();
     if(rowComplete) {
-      console.log('won by rowise',row);
+      gameFinised = true;
     }
+
     const [columnComplete,column] = this.checkColumns();
     if(columnComplete) {
-      console.log('won by column',column);
+      gameFinised = true;
     }
+
     const diagonalWise = this.checkDiagonal();
     if(diagonalWise) {
-      console.log('win by diagonal');
+      gameFinised = true;
     }
+
     const antiDiagonal = this.checkAntiDiagonal();
     if(antiDiagonal) {
-      console.log('won by antiDiagonal');
+      gameFinised = true;
+    }
+
+    if(gameFinised) {
+      const winner = curPlayer === 0 ? 'player 1' : 'player 2';
+      this.setState({
+        winner
+      })
+    }
+    else {
+    this.setState((prevState) => ({
+      curPlayer: prevState.curPlayer === 0 ? 1 : 0
+    }));
     }
   }
 
   handleBoxClick = (selectedRowIndex,selectedItemIndex) => {
+    const curPlayer = this.state.curPlayer;
     const changedGameState = this.state.curGameState.map((row,rowIndex) => {
       if(rowIndex !== selectedRowIndex) {
         return row;
@@ -97,21 +133,20 @@ class App extends Component {
             return item;
           }
           else {
-            return 1;
+            const value = curPlayer === 0 ? 1 : 2;
+            return value;
           }
         });
       }
     });
     this.setState({
-      curGameState: changedGameState
+      curGameState: changedGameState,
     }, () => {
       this.computeWinner();
     });
   }
 
   renderCurGameState = () => {
-    const curGameState = this.state.curGameState;
-    // console.log(curGameState);
     return (
       <div class="board">
         {this.state.curGameState.map((row,rowIndex) =>
@@ -124,9 +159,16 @@ class App extends Component {
   }
 
   render() {
+    const winner = this.state.winner;
+    
+    if(winner) {
+      return (
+        <div>Game was won by: {winner}</div>
+      )
+    }
+
     return (
       <div className="App">
-        Heelo worlds
         {this.renderCurGameState()}
       </div>
     );
