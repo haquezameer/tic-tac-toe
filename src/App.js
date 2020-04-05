@@ -23,12 +23,34 @@ class App extends Component {
     return [false,-1];
   }
 
+  checkDiagonal = () => {
+    const curGameState = this.state.curGameState;
+    let diagonal = true;
+    
+    for(let i = 0, j=0; i < 3 && j<3; i++,j++) {
+      if(curGameState[i][j] !== 1) {
+        diagonal = false;
+        break;
+      }
+    }
+
+    return diagonal;
+  }
+
+  // checkAntiDiagonal = () => {
+
+  // }
+
   computeWinner = () => {
     const curGameState = this.state.curGameState;
-    const [rowComplete,row] = this.checkRows();
-    console.log('checkRows',rowComplete,row);
-    if(rowComplete) {
-      console.log('won by rowise',row);
+    // const [rowComplete,row] = this.checkRows();
+    // console.log('checkRows',rowComplete,row);
+    // if(rowComplete) {
+    //   console.log('won by rowise',row);
+    // }
+    const diagonalWise = this.checkDiagonal();
+    if(diagonalWise) {
+      console.log('win by diagonal');
     }
   }
 
