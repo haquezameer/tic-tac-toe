@@ -79,8 +79,8 @@ class App extends Component {
     const value = e.target.value;
     let err = '';
 
-    if (value < 3 || value % 2 === 0) {
-      err = value < 3 ? 'Board size must be greater than 3!' : 'Board size must be odd';
+    if (value < 3) {
+      err = 'Board size must be greater than 3!';  
     }
 
     this.setState({
